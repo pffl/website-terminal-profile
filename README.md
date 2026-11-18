@@ -1,37 +1,41 @@
-# 🩸 TAKEOWN — Interactive Terminal Website
+# `TAKEOWN // PERSONAL PROFILE WEBSITE`
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=venom&height=220&color=0:050505,50:350008,100:e01e2d&text=TAKEOWN&fontColor=ffffff&fontSize=65&fontAlignY=45&desc=INTERACTIVE%20TERMINAL%20EXPERIENCE&descSize=15&descAlignY=65&animation=fadeIn" width="100%" alt="TAKEOWN banner"/>
+<img width="1600" height="792" alt="image" src="https://github.com/user-attachments/assets/12e26049-bfc4-449a-ac62-ed79e1f68c77" />
 
-### A customizable terminal-inspired website built with HTML, CSS and JavaScript.
 
-<br>
+**`A personal website to showcase yourself and connect all your social platforms in one place.`**
 
 <img src="https://img.shields.io/badge/HTML5-Structure-e34f26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5"/>
 <img src="https://img.shields.io/badge/CSS3-Design-1572b6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3"/>
 <img src="https://img.shields.io/badge/JavaScript-Interactive-f7df1e?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript"/>
-<img src="https://img.shields.io/badge/License-Free%20to%20Customize-00c853?style=for-the-badge" alt="Free to customize"/>
 
-<br><br>
-
-[**Repository**](https://github.com/pffl/website-terminal-profile) • [**Report an Issue**](https://github.com/pffl/website-terminal-profile/issues) • [**View Source Code**](https://github.com/pffl/website-terminal-profile)
+[ `GITHUB REPOSITORY` ](https://github.com/pffl/website-terminal-profile)
 
 </div>
 
 ---
 
-## `01 // PROJECT OVERVIEW`
+## `01 // ABOUT`
 
-**TAKEOWN Terminal** is a browser-based website inspired by Linux command-line interfaces, underground aesthetics and classic terminal environments.
+A personal profile website inspired by terminal interfaces and dark hacker aesthetics.
 
-The project combines a dark visual identity with interactive elements, animated typography, ASCII artwork and a simulated command-line experience.
+The idea is simple: create your own space on the internet where you can present yourself, share your social media, organize your contacts and bring all your important links together in one place.
 
-It was created by **takeown** as a customizable website template.
+Use it as your personal link page, online identity or customized profile.
 
-You can use it as a starting point for your own personal website, portfolio or experimental project.
+**Created by `takeown`, but made to become yours.**
 
-> `Access the interface. Explore the system. Make it yours.`
+You are free to edit the project however you want. Change the design, colors, animations, texts, links, background and everything else to match your own style.
+
+```bash
+> identity: YOUR_NAME
+> type: personal_profile
+> purpose: connect_all_socials
+> customization: unlimited
+> status: open_source_template
+```
 
 ---
 
@@ -39,23 +43,65 @@ You can use it as a starting point for your own personal website, portfolio or e
 
 | Feature | Description |
 |:--|:--|
-| Terminal Interface | Interactive command-line simulation |
-| Boot Sequence | Animated startup with system-style logs |
-| ASCII Artwork | Text-based visual elements |
-| Animated Typography | Glitch, blinking cursor and dripping text |
-| Custom Background | Change the background image |
-| SoundCloud Integration | Embedded music functionality |
-| Visitor Information | Displays available visitor and browser information |
-| Responsive Design | Layout adapted for different screen sizes |
-| Custom Commands | Modify the simulated terminal commands |
-| Visual Effects | Dark interface, scanlines and red accents |
+| Personal Profile | Present yourself with your own identity |
+| Social Media Links | Connect Instagram, Discord, GitHub and other platforms |
+| Contact Information | Display your preferred contact details |
+| Interactive Shell | Navigate the website using terminal commands |
+| Boot Animation | Terminal-inspired startup sequence |
+| ASCII Artwork | Customize the visual identity |
+| Animated Effects | Glitch, blinking cursor and animated typography |
+| Custom Background | Use your own background image |
+| Background Music | SoundCloud integration |
+| Customization | Change the entire website to your liking |
 
 ---
 
-## `03 // TERMINAL COMMANDS`
+## `03 // SHELL COMMANDS`
 
-The website includes a simulated terminal with commands that allow visitors to navigate its interface.
+The website includes an interactive simulated shell. You can use commands to explore the profile and navigate through its virtual directories.
 
-| Command | Function |
+| Command | Description |
 |:--|:--|
-| `help`
+| `help` | Displays all available commands |
+| `ls` | Lists files and directories |
+| `cd` | Changes the current directory |
+| `cat` | Displays the contents of a file |
+| `pwd` | Shows the current directory path |
+| `whoami` | Displays the current user |
+| `clear` | Clears the terminal screen |
+| `mute` | Disables background music |
+| `unmute` | Enables background music |
+
+```bash
+$ help
+$ ls
+$ cd contatos
+$ cat discord.txt
+$ whoami
+```
+
+> `Note: The shell is a simulated interface running in the browser. It does not execute real operating-system commands.`
+
+---
+
+## `04 // MAKE IT YOURS`
+
+The project is designed to be edited and personalized.
+
+You can:
+
+- Replace the original username with your own.
+- Add your social media profiles.
+- Add your personal website and contact links.
+- Change the background and color palette.
+- Modify the ASCII artwork.
+- Customize the terminal commands.
+- Change the animations and startup sequence.
+- Add or remove sections.
+- Modify the music and visual effects.
+
+**There are no fixed rules. Customize it however you like.**
+
+### `EDIT YOUR SOCIAL LINKS`
+
+Open `index.html` and
