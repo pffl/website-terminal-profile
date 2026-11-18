@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>takeown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+ 
+    --banner: url("https://cdn.discordapp.com/attachments/1556172217446834206/1567765812691865772/banner.jpg?ex=6aed5f31&is=6aec0db1&hm=4aa9a83df3a4f8fc1487b192d87fee1cfb2500f80a75396eaea15735ef42272b&");
+
+    --blood: #e01e2d;
+    --ink: #050505;
+    --text: #e8e8e8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body {
+    background: var(--ink);
+    color: var(--text);
+    font-family: "VT323", "Courier New", monospace;
+    font-size: 24px;
+    overflow: hidden;
+    position: fixed; inset: 0; width: 100%;
+  }
+
+  .bg {
+    position: fixed; inset: 0; z-index: -3;
+    background: var(--ink) var(--banner) center / cover no-repeat;
+    filter: blur(2px);
+    transform: scale(1.1);
+  }
+  .bg::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,.4) 0%, rgba(0,0,0,.88) 100%);
+  }
+  .scan {
+    position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.3) 0 1px, transparent 1px 3px);
+  }
+
+  .hero {
+    height: 100vh; height: 100dvh;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: .5rem 1rem;
+  }
+
+  pre { white-space: pre; text-align: left; user-select: none; }
+
+  .ascii {
+    font-family: "VT323", "Courier New", monospace;
+    font-size: clamp(7px, min(1.3vh, 2.4vw), 15px);
+    font-size: clamp(7px, min(1.3dvh, 2.4vw), 15px);
+    line-height: 1.02;
+    color: var(--blood);
+    text-shadow: 0 0 8px rgba(224,30,45,.6);
+    margin-bottom: 1.2vh;
+  }
+
+  /* Nome em ASCII com sangue escorrendo */
+  .name {
+    font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, "Courier New", monospace;
+    font-size: clamp(6px, min(1.6vh, 2.6vw), 18px);
+    font-size: clamp(6px, min(1.6dvh, 2.6vw), 18px);
+    line-height: 1;
+    color: var(--blood);
+    text-shadow: 0 0 14px rgba(224,30,45,.65);
+    animation: nameblink 6s linear infinite;
+  }
+  @keyframes nameblink {
+    0%, 8%    { opacity: 1; }
+    9%        { opacity: .15; }
+    10%       { opacity: 1; }
+    11%       { opacity: .3; }
+    12%       { opacity: 1; }
+    13%       { opacity: .05; }
+    14.5%     { opacity: .9; }
+    15.5%     { opacity: .1; }
+    17%, 55%  { opacity: 1; }
+    56%       { opacity: .2; }
+    57%       { opacity: 1; }
+    58%       { opacity: .08; }
+    59.5%     { opacity: 1; }
+    60%       { opacity: .4; }
+    61%, 82%  { opacity: 1; }
+    83%       { opacity: .1; }
+    84%       { opacity: .85; }
+    85%       { opacity: .05; }
+    86%       { opacity: .7; }
+    87.5%     { opacity: .12; }
+    89%       { opacity: 1; }
+    90%       { opacity: .25; }
+    91%, 100% { opacity: 1; }
+  }
+  .name .d {
+    display: block;
+    opacity: 0;
+    animation: drip 9s ease-in infinite;
+    animation-delay: calc(var(--i) * .45s);
+  }
+  @keyframes drip {
+    0%   { opacity: 0; }
+    8%   { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .tag {
+    margin-top: 1.5vh;
+    font-size: clamp(13px, 2.3vh, 19px);
+    text-shadow: 0 0 6px #000;
+  }
+  .tag .cur {
+    margin-left: 4px; color: var(--blood);
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .name { animation: none; }
+    .name .d { animation: none; opacity: 1; }
+    .tag .cur { animation: none; }
+  }
+
+  /* Mini terminal */
+  .term {
+    width: min(500px, 92vw);
+    margin-top: 1.5vh;
+    background: rgba(0,0,0,.78);
+    border: 1px solid #6a040f;
+    border-left: 4px solid var(--blood);
+    font-size: clamp(13px, 2.2vh, 17px);
+    line-height: 1.2;
+    cursor: text;
+  }
+  .term-bar {
+    padding: .1rem .8rem;
+    color: #9a9a9a;
+    border-bottom: 1px dashed #6a040f;
+    font-size: .85em;
+  }
+  .term-out {
+    height: clamp(70px, 15vh, 130px);
+    touch-action: pan-y;
+    overflow-y: auto;
+    padding: .35rem .7rem 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .term-out .ln { min-height: 1.25em; }
+  .term-out .dir { color: var(--blood); }
+  .term-out .dim { color: #9a9a9a; }
+  .term-out .ok  { color: #e8e8e8; text-shadow: 0 0 6px rgba(224,30,45,.5); }
+  .term-row { display: flex; align-items: center; padding: 0 .7rem .4rem; }
+  .term-row .ps { color: var(--blood); white-space: pre; }
+  .term-row input {
+    flex: 1; min-width: 0;
+    background: transparent; border: 0; outline: 0;
+    color: var(--text);
+    font: inherit;
+    caret-color: var(--blood);
+    margin-left: .5ch;
+  }
+  .term:focus-within { border-left-color: #ff3b4a; }
+
+  /* Tela de boot (load) */
+  #boot {
+    position: fixed; inset: 0; z-index: 100;
+    background: #000; color: #cfcfcf;
+    font-family: "VT323", "Courier New", monospace;
+    font-size: clamp(14px, 2.1vh, 20px);
+    line-height: 1.15;
+    display: block;
+    text-align: left;
+    padding: .8rem 1rem;
+    overflow: hidden;
+    cursor: pointer;
+    transition: opacity .8s ease;
+  }
+  #boot.out { opacity: 0; pointer-events: none; }
+  .bl { white-space: pre-wrap; word-break: break-word; }
+  .bl .t.ok   { color: #3ddc84; }
+  .bl .t.warn { color: var(--blood); }
+  .bl .t.info { color: #9a9a9a; }
+  .bl.red { color: var(--blood); }
+  #bootgo {
+    display: none; margin-top: .8rem; color: var(--text);
+    animation: blink 1s steps(1) infinite;
+  }
+</style>
+</head>
+<body>
+<div id="boot" aria-live="polite"><div id="bootlog"></div><div id="bootgo">[ pressione qualquer tecla ou toque para entrar ]</div></div>
+<div class="bg"></div>
+<div class="scan"></div>
+
+<header class="hero">
+<pre class="ascii" aria-hidden="true">
+              ...                            
+             ;::::;                           
+           ;::::; :;                          
+         ;:::::'   :;                         
+        ;:::::;     ;.                        
+       ,:::::'       ;           OOO\         
+       ::::::;       ;          OOOOO\        
+       ;:::::;       ;         OOOOOOOO       
+      ,;::::::;     ;'         / OOOOOOO      
+    ;:::::::::`. ,,,;.        /  / DOOOOOO    
+  .';:::::::::::::::::;,     /  /     DOOOO   
+ ,::::::;::::::;;;;::::;,   /  /        DOOO  
+;`::::::`'::::::;;;::::: ,#/  /          DOOO 
+:`:::::::`;::::::;;::: ;::#  /            DOOO
+::`:::::::`;:::::::: ;::::# /              DOO
+`:`:::::::`;:::::: ;::::::#/               DOO
+ :::`:::::::`;; ;:::::::::##                OO
+ ::::`:::::::`;::::::::;:::#                OO
+ `:::::`::::::::::::;'`:;::#                O 
+  `:::::`::::::::;' /  / `:#                  
+   ::::::`:::::;'  /  /   `#      
+</pre>
+<h1><pre class="name" aria-label="takeown">
+█████  ███  █   █ █████  ███  █   █ █   █
+  █   █   █ █  █  █     █   █ █   █ ██  █
+  █   █████ ███   ████  █   █ █ █ █ █ █ █
+  █   █   █ █  █  █     █   █ █ █ █ █  ██
+  █   █   █ █   █ █     █   █ ██ ██ █   █
+  █   █   █ █   █ █████  ███  █   █ █   █
+<span class="d" style="--i:0">  |   |   | |   |  |  |   |   |   | |   |</span>
+<span class="d" style="--i:1">  |   o   | |   |  |  o   |   |   | o   |</span>
+<span class="d" style="--i:2">  |       | o   |  o      |   o   |     |</span>
+<span class="d" style="--i:3">  o       |     |         |       o     o</span>
+<span class="d" style="--i:4">          o     |         o</span>
+<span class="d" style="--i:5">                o</span>
+</pre></h1>
+<div class="tag">root@takeown:~# whoami<span class="cur">█</span></div>
+
+<div class="term" id="term">
+  <div class="term-bar">visitante@takeown: shell</div>
+  <div class="term-out" id="out" aria-live="polite"></div>
+  <div class="term-row">
+    <span class="ps" id="ps"></span>
+    <input id="in" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="terminal">
+  </div>
+</div>
+</header>
+<script>
+(function () {
+  // ===== Edite aqui: arquivos e pastas do terminal =====
+  var root = { t: "dir", c: {
+    "contatos": { t: "dir", enter: "discord: takeown", c: {
+      "discord.txt": { t: "file", v: "discord: takeown" }
+    } },
+    "redesocial": { t: "dir", enter: "instagram: @1h9u", c: {
+      "instagram.txt": { t: "file", v: "instagram: @1h9u" }
+    } }
+  } };
+  // ======================================================
+
+  var out = document.getElementById("out");
+  var inp = document.getElementById("in");
+  var psEl = document.getElementById("ps");
+  var term = document.getElementById("term");
+  var cwd = [];
+  var hist = [], hi = 0;
+
+  function ps() { return "visitante@takeown:~" + (cwd.length ? "/" + cwd.join("/") : "") + "$"; }
+  function refreshPs() { psEl.textContent = ps(); }
+
+  function line(text, cls) {
+    var d = document.createElement("div");
+    d.className = "ln" + (cls ? " " + cls : "");
+    d.textContent = text;
+    out.appendChild(d);
+    out.scrollTop = out.scrollHeight;
+    return d;
+  }
+  function node(path) {
+    var n = root;
+    for (var i = 0; i < path.length; i++) n = n.c[path[i]];
+    return n;
+  }
+  // resolve caminho relativo/absoluto -> array de nomes, ou null
+  function resolve(arg) {
+    var parts = (arg || "").split("/").filter(function (s) { return s !== "" && s !== "."; });
+    var path = (arg && (arg[0] === "/" || arg[0] === "~")) ? [] : cwd.slice();
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+      if (p === "~") { path = []; continue; }
+      if (p === "..") { path.pop(); continue; }
+      var cur = node(path);
+      if (cur.t !== "dir" || !cur.c[p]) return null;
+      path.push(p);
+    }
+    return path;
+  }
+
+  var cmds = {
+    help: function () {
+      line("comandos:");
+      line("  ls             lista arquivos");
+      line("  cd <pasta>     entra numa pasta: contatos, redesocial");
+      line("  cd ..          volta");
+      line("  cat <arquivo>  mostra um arquivo");
+      line("  pwd            mostra onde você está");
+      line("  whoami         quem é você");
+      line("  clear          limpa a tela");
+      line("  mute / unmute  liga e desliga o som");
+    },
+    ls: function (a) {
+      var p = a[0] ? resolve(a[0]) : cwd;
+      if (!p) return line("ls: não encontrado: " + a[0]);
+      var n = node(p);
+      if (n.t === "file") return line(a[0]);
+      var names = Object.keys(n.c);
+      if (!names.length) return line("(vazio)", "dim");
+      var d = document.createElement("div");
+      d.className = "ln";
+      names.forEach(function (k) {
+        var s = document.createElement("span");
+        if (n.c[k].t === "dir") { s.className = "dir"; s.textContent = k + "/"; }
+        else s.textContent = k;
+        d.appendChild(s);
+        d.appendChild(document.createTextNode("   "));
+      });
+      out.appendChild(d);
+    },
+    cd: function (a) {
+      if (!a[0]) { cwd = []; return; }
+      var p = resolve(a[0]);
+      if (!p) return line("cd: " + a[0] + ": pasta não encontrada");
+      var n = node(p);
+      if (n.t !== "dir") return line("cd: " + a[0] + ": não é uma pasta");
+      cwd = p;
+      if (n.enter) line(n.enter, "ok");
+    },
+    cat: function (a) {
+      if (!a[0]) return line("cat: informe um arquivo");
+      var p = resolve(a[0]);
+      if (!p) return line("cat: " + a[0] + ": arquivo não encontrado");
+      var n = node(p);
+      if (n.t !== "file") return line("cat: " + a[0] + ": é uma pasta");
+      line(n.v, "ok");
+    },
+    pwd: function () { line("/home/visitante" + (cwd.length ? "/" + cwd.join("/") : "")); },
+    whoami: function () { line("visitante"); },
+    clear: function () { out.textContent = ""; },
+    mute: function () {
+      if (!window.takeownAudio) return line("sem áudio configurado.", "dim");
+      window.takeownAudio.muted = true; line("som desligado.", "dim");
+    },
+    unmute: function () {
+      if (!window.takeownAudio) return line("sem áudio configurado.", "dim");
+      window.takeownAudio.muted = false; line("som ligado.", "dim");
+    },
+    sudo: function () { line("visitante não está no sudoers. este incidente será reportado.", "dim"); }
+  };
+
+  function run(raw) {
+    var row = document.createElement("div");
+    row.className = "ln";
+    var s = document.createElement("span");
+    s.style.color = "#e01e2d";
+    s.textContent = ps() + " ";
+    row.appendChild(s);
+    row.appendChild(document.createTextNode(raw));
+    out.appendChild(row);
+
+    var parts = raw.trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return;
+    var name = parts[0].toLowerCase();
+    if (cmds.hasOwnProperty(name)) cmds[name](parts.slice(1));
+    else line("comando não encontrado: " + parts[0] + " (digite help)");
+    out.scrollTop = out.scrollHeight;
+  }
+
+  function complete() {
+    var v = inp.value;
+    var parts = v.split(/\s+/);
+    var last = parts[parts.length - 1];
+    var pool = parts.length === 1 ? Object.keys(cmds) : Object.keys(node(cwd).c);
+    var m = pool.filter(function (k) { return k.indexOf(last) === 0; });
+    if (m.length === 1) {
+      parts[parts.length - 1] = m[0];
+      inp.value = parts.join(" ");
+    }
+  }
+
+  inp.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      var v = inp.value;
+      if (v.trim()) { hist.push(v); }
+      hi = hist.length;
+      inp.value = "";
+      run(v);
+      refreshPs();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (hi > 0) { hi--; inp.value = hist[hi]; }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (hi < hist.length - 1) { hi++; inp.value = hist[hi]; }
+      else { hi = hist.length; inp.value = ""; }
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      complete();
+    } else if (e.key === "l" && e.ctrlKey) {
+      e.preventDefault();
+      cmds.clear();
+    }
+  });
+  term.addEventListener("click", function () { inp.focus(); });
+
+  refreshPs();
+  line("digite help para ver os comandos.", "dim");
+  line("");
+  line("pastas (use cd <pasta> para entrar):", "dim");
+  cmds.ls([]);
+})();
+</script>
+
+<script>
+(function () {
+  // >>> LINK DA MUSICA NO SOUNDCLOUD (troque aqui se quiser outra) <<<
+  var SC_URL = "https://soundcloud.com/v6h/www";
+
+  var boot = document.getElementById("boot");
+  var log = document.getElementById("bootlog");
+  var go = document.getElementById("bootgo");
+  var hasMusic = !!SC_URL;
+  var entered = false;
+  var widget = null;
+
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function p(tag, text, cls) {
+    var d = document.createElement("div");
+    d.className = "bl" + (cls === "red" ? " red" : "");
+    if (tag) {
+      var s = document.createElement("span");
+      var k = tag === "OK" ? "ok" : tag === "!!" ? "warn" : "info";
+      s.className = "t " + k;
+      s.textContent = tag === "OK" ? "[  OK  ]" : tag === "!!" ? "[ !!!! ]" : "[ INFO ]";
+      d.appendChild(s);
+      d.appendChild(document.createTextNode(" " + text));
+    } else {
+      d.textContent = text;
+    }
+    log.appendChild(d);
+    boot.scrollTop = boot.scrollHeight;
+  }
+
+  // ---- dados do visitante (só aparecem na tela dele) ----
+  var ipP = fetch("https://ipwho.is/")
+    .then(function (r) { return r.json(); })
+    .then(function (j) { return j && j.success !== false ? { city: j.city } : null; })
+    .catch(function () { return null; });
+
+  var geoP = Promise.race([
+    new Promise(function (res) {
+      if (!navigator.geolocation) return res(null);
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        var u = "https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=16&accept-language=pt-BR&lat=" +
+          pos.coords.latitude + "&lon=" + pos.coords.longitude;
+        fetch(u).then(function (r) { return r.json(); }).then(function (j) {
+          var a = (j && j.address) || {};
+          res({
+            bairro: a.suburb || a.neighbourhood || a.city_district || a.quarter || a.village || null,
+            city: a.city || a.town || a.municipality || null
+          });
+        }).catch(function () { res(null); });
+      }, function () { res(null); }, { timeout: 12000, maximumAge: 600000 });
+    }),
+    sleep(10000).then(function () { return null; })
+  ]);
+
+  var cpuP = (function () {
+    var base = (navigator.hardwareConcurrency || "?") + " núcleos";
+    var uad = navigator.userAgentData;
+    if (uad && uad.getHighEntropyValues) {
+      return uad.getHighEntropyValues(["architecture", "bitness"]).then(function (v) {
+        var a = v.architecture || "", b = v.bitness || "";
+        if (a === "x86" && b === "64") a = "x86_64";
+        else if (a === "arm" && b === "64") a = "arm64";
+        else a = a + b;
+        return a ? base + " · " + a : base;
+      }).catch(function () { return base; });
+    }
+    return Promise.resolve(base);
+  })();
+
+  // ---- música (SoundCloud) ----
+  var audioP = Promise.resolve(false);
+  if (hasMusic) {
+    audioP = new Promise(function (res) {
+      var f = document.createElement("iframe");
+      f.allow = "autoplay";
+      f.tabIndex = -1;
+      f.setAttribute("aria-hidden", "true");
+      f.style.cssText = "position:fixed;left:-9999px;top:0;width:300px;height:166px;border:0;opacity:0;pointer-events:none";
+      f.src = "https://w.soundcloud.com/player/?url=" + encodeURIComponent(SC_URL) +
+        "&auto_play=false&hide_related=true&show_comments=false&show_user=false&visual=false";
+      document.body.appendChild(f);
+
+      var s = document.createElement("script");
+      s.src = "https://w.soundcloud.com/player/api.js";
+      s.onload = function () {
+        try {
+          widget = SC.Widget(f);
+          widget.bind(SC.Widget.Events.READY, function () {
+            widget.setVolume(60);
+            window.takeownAudio = { set muted(v) { widget.setVolume(v ? 0 : 60); } };
+            if (entered) widget.play();
+            res(true);
+          });
+          widget.bind(SC.Widget.Events.FINISH, function () { widget.seekTo(0); widget.play(); });
+        } catch (e) { res(false); }
+      };
+      s.onerror = function () { res(false); };
+      document.head.appendChild(s);
+      setTimeout(function () { res(false); }, 12000);
+    });
+  }
+
+  function enter() {
+    if (entered) return;
+    entered = true;
+    if (widget) { try { widget.play(); } catch (e) {} }
+    boot.classList.add("out");
+    setTimeout(function () { boot.remove(); }, 900);
+  }
+  boot.addEventListener("pointerdown", enter);
+  window.addEventListener("keydown", enter);
+
+  var pre = [
+    [null, "[    0.000000] Linux version 6.8.0-takeown (root@takeown) (gcc 13.2.0) #1 SMP PREEMPT"],
+    [null, "[    0.000000] Command line: BOOT_IMAGE=/vmlinuz-6.8.0 root=/dev/sda1 ro quiet deface=1"],
+    [null, "[    0.004211] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable"],
+    [null, "[    0.118342] ACPI: Core revision 20230628"],
+    [null, "[    0.241907] smpboot: Allowing 8 CPUs, 0 hotplug CPUs"],
+    [null, "[    0.412337] pci 0000:00:02.0: [8086:5917] type 00 class 0x030000"],
+    [null, "[    0.688120] NET: Registered PF_INET protocol family"],
+    ["OK", "Reached target Local File Systems."],
+    ["OK", "Started Journal Service."],
+    ["OK", "Mounted /boot/efi."],
+    [null, "[    1.204455] EXT4-fs (sda1): mounted filesystem with ordered data mode"],
+    ["OK", "Started udev Kernel Device Manager."],
+    ["OK", "Started Network Manager."],
+    ["!!", "firewall.service: acesso negado... ignorado."],
+    ["OK", "Started OpenBSD Secure Shell server."],
+    ["!!", "injetando payload no alvo..."],
+    ["OK", "payload entregue. index.html sobrescrito."],
+    [null, "[    2.019933] audit: type=1400 msg=takeown: acesso root obtido"],
+    ["OK", "Reached target Network is Online."]
+  ];
+
+  async function run() {
+    for (var i = 0; i < pre.length; i++) {
+      if (entered) return;
+      p(pre[i][0], pre[i][1]);
+      await sleep(60 + Math.random() * 110);
+    }
+    if (entered) return;
+    p("INFO", "localizando alvo...");
+    var ip = await ipP, g = await geoP, cpu = await cpuP;
+    if (entered) return;
+
+    var city = (g && g.city) || (ip && ip.city) || "desconhecida";
+    var bairro = (g && g.bairro) || "não autorizado";
+
+    p("OK", "cidade ........... " + city);       await sleep(350);
+    p("OK", "bairro ........... " + bairro);     await sleep(350);
+    p("OK", "processador ...... " + cpu);        await sleep(350);
+    p("!!", "alvo identificado.", "red");        await sleep(450);
+
+    if (hasMusic) {
+      p("INFO", "carregando audio...");
+      var ok = await audioP;
+      if (entered) return;
+      p(ok ? "OK" : "!!", ok ? "audio carregado." : "audio indisponivel, entrando sem som.");
+    }
+    await sleep(250);
+    p("OK", "Reached target Graphical Interface.");
+    await sleep(200);
+    p(null, "takeown login: root (automatic login)");
+    p(null, "este site foi tomado.", "red");
+    go.style.display = "block";
+    boot.scrollTop = boot.scrollHeight;
+  }
+  run();
+})();
+</script>
+</body>
+</html>
